@@ -1,0 +1,10 @@
+name: NewRiseRealms
+version: '${project.version}'
+main: com.paulpanosch.newriserealms.NewRiseRealms
+api-version: 1.18
+authors: [ Paul_Panosch ]
+description: A custom plugin for the New Rise Realms SMP
+commands:
+  getCrystal:
+    usage: /<command>
+    description: Get a PowerfulCrystal
