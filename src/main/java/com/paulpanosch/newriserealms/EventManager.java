@@ -23,6 +23,7 @@ public class EventManager implements Listener {
         CraftingInventory inv = event.getInventory();
         for (ItemStack item : inv.getMatrix()) {
             if (item == null) continue;
+            if (item.getItemMeta() == null) continue;
             if (item.getItemMeta().getLocalizedName().equals("Powerful Crystal")) {
                 inv.setResult(new ItemStack(Material.AIR));
                 break;
@@ -42,6 +43,8 @@ public class EventManager implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
         ItemMeta itemMeta = item.getItemMeta();
+
+        if (itemMeta == null) return;
 
         if (itemMeta.getLocalizedName().equals("Powerful Crystal")) {
             PersistentDataContainer customDataContainer = itemMeta.getPersistentDataContainer();
@@ -71,40 +74,44 @@ public class EventManager implements Listener {
 
     private void onRightClick(PlayerInteractEvent event) {
         Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        ItemMeta itemMeta = item.getItemMeta();
 
-        Location loc = player.getLocation().add(0,1.65,0);
-        Vector vec = loc.getDirection();
+        if (itemMeta == null) return;
 
-        Entity ppp = player;
-        Predicate<Entity> p = entity -> !player.equals(entity) && entity instanceof Player;
+        if (itemMeta.getLocalizedName().equals("Powerful Crystal")) {
 
-        RayTraceResult res = player.getWorld().rayTrace(loc, vec, 200, FluidCollisionMode.NEVER, false, .1, p);
-        if (res == null) return;
-        if (res.getHitEntity() == null) return;
+            Location loc = player.getLocation().add(0, 1.65, 0);
+            Vector vec = loc.getDirection();
 
-        if (res.getHitEntity() instanceof Player target) {
-            ItemStack item = player.getInventory().getItemInMainHand();
-            ItemMeta itemMeta = item.getItemMeta();
-            PersistentDataContainer customDataContainer = itemMeta.getPersistentDataContainer();
-            NamespacedKey key = new NamespacedKey(NewRiseRealms.getInstance(), "Mode");
+            Predicate<Entity> p = entity -> !player.equals(entity) && entity instanceof Player;
 
-            int modeNumber = customDataContainer.get(key, PersistentDataType.INTEGER);
-            switch (modeNumber) {
-                case 1 -> {
-                    target.setGameMode(GameMode.SURVIVAL);
-                    player.sendMessage("Set " + target.getName() + " to survival");
+            RayTraceResult res = player.getWorld().rayTrace(loc, vec, 200, FluidCollisionMode.NEVER, false, .1, p);
+            if (res == null) return;
+            if (res.getHitEntity() == null) return;
+
+            if (res.getHitEntity() instanceof Player target) {
+                PersistentDataContainer customDataContainer = itemMeta.getPersistentDataContainer();
+                NamespacedKey key = new NamespacedKey(NewRiseRealms.getInstance(), "Mode");
+
+                int modeNumber = customDataContainer.get(key, PersistentDataType.INTEGER);
+                switch (modeNumber) {
+                    case 1 -> {
+                        target.setGameMode(GameMode.SURVIVAL);
+                        player.sendMessage("Set " + target.getName() + " to survival");
+                    }
+                    case 2 -> {
+                        target.setGameMode(GameMode.ADVENTURE);
+                        player.sendMessage("Set " + target.getName() + " to adventure");
+                    }
+                    case 3 -> {
+                        target.setGameMode(GameMode.CREATIVE);
+                        player.sendMessage("Set " + target.getName() + " to creative");
+                    }
                 }
-                case 2 -> {
-                    target.setGameMode(GameMode.ADVENTURE);
-                    player.sendMessage("Set " + target.getName() + " to adventure");
-                }
-                case 3 -> {
-                    target.setGameMode(GameMode.CREATIVE);
-                    player.sendMessage("Set " + target.getName() + " to creative");
-                }
+                target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0, 0, 0, .1);
+                target.setVelocity(new Vector(0, .5, 0));
             }
-            target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 10, 0, 0, 0, .1);
-            target.setVelocity(new Vector(0, .5, 0));
         }
     }
 }
